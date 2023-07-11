@@ -1,9 +1,10 @@
 
+from users.permissions import IsSimpleUser, IsAdmin
 from .models import Configuration
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views import View
-import datetime
+from datetime import datetime
 from os import truncate
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
@@ -35,45 +36,6 @@ class RegisterView(APIView):
         return Response(user.data, status=status.HTTP_201_CREATED)
 
 
-class RetrieveUserView(APIView):
-    def get(self, request):
-        objects = OrganizationObject.objects.all()
-        projects = Project.objects.all()
-        print(len(objects), projects[0].title)
-        # DataPoint.objects.create({
-        #     'name': 'demo', 'object': objects[0], 'value': 12, 'project name': projects[0].title, 'project object': objects[0].name
-        # })
-        # c = DataPoint(
-        #     name='demo1', object=objects[0], value=12, project_name=projects[0].title, object_name=objects[0].name, created_date='2023-09-13 15:35:12.559642'
-        # )
-        # c.save()
-
-        import random
-        print(random.uniform(1.0, 100.0))
-        import pandas as pd
-        from datetime import datetime
-
-        datelist = pd.date_range(datetime.today(), periods=300).tolist()
-
-        print(datelist[0])
-        count = 0
-        # obj1 = objects[:3]
-        obj2 = objects[3:]
-        for o in obj2:
-            for d in datelist:
-                val = random.uniform(1.0, 100.0)
-                c = DataPoint(
-                    name='test ' + o.name + ' ' + str(count), object=o, value=val, project_name=projects[1].title, object_name=o.name, created_date=datelist
-                )
-                c.save()
-                count += 1
-                if count == 100:
-                    count = 0
-                    break
-
-        return Response({'data': 123}, status=status.HTTP_200_OK)
-
-
 class DataPointAPIList(generics.ListCreateAPIView):
     queryset = DataPoint.objects.all()
     serializer_class = DataPointSerializer
@@ -89,28 +51,21 @@ class DataPointAPIList(generics.ListCreateAPIView):
 
 @api_view(['GET'])
 def get_datapoint_by_id(request, pk=None):
+    target_date = datetime(2023, 7, 10, 12, 10, 12, 11)
+    print(DataPoint.objects.filter(created_date__gte=target_date))
+    print(DataPoint.objects.filter(id=930).first().value)
+    print(target_date)
     obj = get_object_or_404(DataPoint, pk=pk)
     serializer = DataPointSerializer(obj)
     return Response(serializer.data)
 
+# 2023-07-10 12:10:37.803000+00:00
 
-@api_view(['GET'])
-def get_aggregate_data(request, pk=None):
-    # obj = get_object_or_404(DataPoint, pk=pk)
-    # serializer = DataPointSerializer(obj)
-    # print(DataPoint.objects.aggregate(Avg('value'))) #average value time series
-
-    d = DataPoint.objects.filter(created_date__gt='2023-07-10 12:10:37')
-    print(len(d), d)
-    return Response({'fd': "serializer.data"})
-
-
-# 2023-07-10 12:10:37.803371+00:00
-# 2023-07-10 17:35:25.450812+00:00
 
 class ProjectAPIUpdate(generics.RetrieveUpdateAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsAdmin | IsSimpleUser]
 
 
 class ConfigurationView(generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):  # not working

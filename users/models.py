@@ -96,8 +96,8 @@ class DataPoint(models.Model):
         default='object name', max_length=124, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self) -> str:
-        return self.created_date
+    # def __str__(self) -> str:
+    #     return self.created_date
 
 
 class Configuration(models.Model):
