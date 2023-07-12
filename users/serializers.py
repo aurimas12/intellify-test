@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from .models import DataPoint, Configuration, Project
+from .models import DataPoint, Configuration, Project, TimeSeries
 User = get_user_model()
 
 
@@ -50,4 +50,11 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
+        fields = '__all__'
+
+
+class TimeSeriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TimeSeries
         fields = '__all__'

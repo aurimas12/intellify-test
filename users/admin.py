@@ -7,3 +7,5 @@ admin.site.register(Project)
 admin.site.register(ProjectTeam)
 admin.site.register(OrganizationObject)
 admin.site.register(DataPoint)
+
+admin.site.register(TimeSeries)

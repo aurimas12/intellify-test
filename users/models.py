@@ -105,3 +105,8 @@ class Configuration(models.Model):
     data = models.JSONField()
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class TimeSeries(models.Model):
+    data = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)

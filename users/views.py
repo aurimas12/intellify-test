@@ -1,4 +1,5 @@
 
+from .tasks import generate_data
 from users.permissions import IsSimpleUser, IsAdmin
 from .models import Configuration
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -46,20 +47,24 @@ class DataPointAPIList(generics.ListCreateAPIView):
 
     def get(self, request, pk=None):
         # data = self.queryset.values_list('id', flat=True)
+        test.delay()
         return Response({'ids': 'data'})
 
 
 @api_view(['GET'])
 def get_datapoint_by_id(request, pk=None):
-    target_date = datetime(2023, 7, 10, 12, 10, 12, 11)
-    print(DataPoint.objects.filter(created_date__gte=target_date))
-    print(DataPoint.objects.filter(id=930).first().value)
-    print(target_date)
     obj = get_object_or_404(DataPoint, pk=pk)
     serializer = DataPointSerializer(obj)
     return Response(serializer.data)
 
 # 2023-07-10 12:10:37.803000+00:00
+
+
+@api_view(['GET'])
+def generate_data_auth_user(request):
+    generate_data.delay(request.user.email)
+
+    return Response({'action': 'generate data'})
 
 
 class ProjectAPIUpdate(generics.RetrieveUpdateAPIView):

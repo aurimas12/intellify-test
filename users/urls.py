@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, DataPointAPIList, get_datapoint_by_id, ConfigurationView, ProjectAPIUpdate
+from .views import RegisterView, DataPointAPIList, get_datapoint_by_id, ConfigurationView, ProjectAPIUpdate, generate_data_auth_user
 
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     # datapoint
     path('datapoint/', DataPointAPIList.as_view()),
     path('datapoint/<int:pk>/', get_datapoint_by_id),
+    path('gen-data/', generate_data_auth_user),
 
 
 
