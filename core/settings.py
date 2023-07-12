@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
 
     'users',
+    'celery',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -157,3 +159,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURE_HSTS_SECONDS = 518400
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
+# set the celery broker url
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+# set the celery result backend
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# set the celery timezone
+CELERY_TIMEZONE = 'UTC'
