@@ -9,3 +9,4 @@ admin.site.register(OrganizationObject)
 admin.site.register(DataPoint)
 
 admin.site.register(TimeSeries)
+admin.site.register(Configuration)
