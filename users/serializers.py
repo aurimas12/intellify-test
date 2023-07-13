@@ -3,8 +3,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
 from rest_framework import serializers
 
-from users.models import (Configuration, DataPoint, OrganizationObject, Project,
-                          ProjectTeam, TimeSeries)
+from users.models import (Configuration, DataPoint, Organization,
+                          OrganizationObject, Project, ProjectTeam, TimeSeries)
 
 User = get_user_model()
 
@@ -48,11 +48,22 @@ class ConfigurationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrganizationSerializer(serializers.ModelSerializer):
+    users = UserSerializer(many=True)
+
+    class Meta:
+        model = Organization
+        fields = ['name', 'description', 'users']
+
+
 class ProjectSerializer(serializers.ModelSerializer):
+    owner = UserSerializer()
+    organization = OrganizationSerializer()
 
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['id', 'title', 'description',
+                  'created_date', 'owner', 'organization']
 
 
 class ProjectTeamSerializer(serializers.ModelSerializer):

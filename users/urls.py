@@ -12,9 +12,9 @@ urlpatterns = [
     path('project/<int:pk>/', ProjectAPIView.as_view({'get': 'retrieve'})),
     path('project/detail/', get_project_by_user),
     path('datapoint/', DataPointAPIList.as_view()),
-    path('aggregate/', get_datapoint_by_id),
+    path('datapoint/aggregate/', get_datapoint_by_id),
     path('datapoint/avg/', get_average),
     path('datapoint/hourly/<int:start_hour>/<int:hour_range>', get_hourly),
-    path('gen-data/', generate_data_auth_user),
+    path('datapoint/gen-data/', generate_data_auth_user),
     path('configuration/', ConfigurationView.as_view(), name='configuration')
 ]

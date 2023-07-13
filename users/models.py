@@ -52,6 +52,9 @@ class Organization(models.Model):
     description = models.TextField(blank=True, null=True)
     users = models.ManyToManyField(UserAccount)
 
+    def __str__(self):
+        return self.name
+
 
 class Project(models.Model):
     title = models.CharField(max_length=124, null=True, blank=True)
@@ -60,11 +63,17 @@ class Project(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.title} - {self.created_date.date()}'
+
 
 class OrganizationObject(models.Model):
     name = models.CharField(max_length=124)
     description = models.TextField(blank=True, null=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 
 class ProjectTeam(models.Model):
@@ -83,6 +92,9 @@ class ProjectTeam(models.Model):
     role = models.PositiveSmallIntegerField(choices=ROLE)
     created_date = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.user} - {self.project.title}'
+
 
 class DataPoint(models.Model):
     name = models.CharField(max_length=124, null=True, blank=True)
@@ -92,7 +104,11 @@ class DataPoint(models.Model):
         default='project name', max_length=124, null=True, blank=True)
     object_name = models.CharField(
         default='object name', max_length=124, null=True, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
+    created_date = models.DateTimeField(
+        format(['%Y-%m-%d %H:%M']), auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.name} {self.created_date.date()} {self.created_date.time()}'
 
 
 class Configuration(models.Model):
@@ -101,7 +117,13 @@ class Configuration(models.Model):
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
 
 class TimeSeries(models.Model):
     data = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.created_at
