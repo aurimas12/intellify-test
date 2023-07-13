@@ -1,11 +1,12 @@
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
 
 class UserAccountManager(BaseUserManager):
     def create_user(self, email, password=None):
         if not email:
-            raise ValueError("Users must have an email address")
+            raise ValueError('Users must have an email address')
 
         email = self.normalize_email(email)
         email = email.lower()
@@ -20,14 +21,11 @@ class UserAccountManager(BaseUserManager):
 
     def create_superuser(self, first_name, last_name, email, password=None):
         user = self.create_user(
-            # first_name, last_name,
             email, password=password
-
         )
         user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
-
         return user
 
 
@@ -75,9 +73,9 @@ class ProjectTeam(models.Model):
     ROLE_SIMPLE_USER = 3
 
     ROLE = (
-        (ROLE_ADMIN, ("Admin")),
-        (ROLE_MODERATOR, ("Moderator")),
-        (ROLE_SIMPLE_USER, ("Simple User")),
+        (ROLE_ADMIN, ('Admin')),
+        (ROLE_MODERATOR, ('Moderator')),
+        (ROLE_SIMPLE_USER, ('Simple User')),
     )
     project = models.ForeignKey(
         Project, on_delete=models.CASCADE, related_name='project')
@@ -95,9 +93,6 @@ class DataPoint(models.Model):
     object_name = models.CharField(
         default='object name', max_length=124, null=True, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
-
-    # def __str__(self) -> str:
-    #     return self.created_date
 
 
 class Configuration(models.Model):

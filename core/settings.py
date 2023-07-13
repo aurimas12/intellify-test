@@ -1,7 +1,6 @@
-from decouple import config
 from datetime import timedelta
-from django.core.management.utils import get_random_secret_key
 
+from decouple import config
 
 SECRET_KEY = config('SECRET_KEY')
 
@@ -103,11 +102,11 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
-#     }
-# }
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
 
 AUTH_USER_MODEL = "users.UserAccount"
 
@@ -159,11 +158,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURE_HSTS_SECONDS = 518400
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
-# set the celery broker url
+
+
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
-# set the celery result backend
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
-# set the celery timezone
 CELERY_TIMEZONE = 'UTC'

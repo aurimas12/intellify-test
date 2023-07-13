@@ -1,36 +1,22 @@
 
-from .tasks import generate_data
-from users.permissions import IsSimpleUser, IsAdmin
-from .models import Configuration, ProjectTeam
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.views import View
-from datetime import datetime
-from os import truncate
-from django.db.models import Count, Sum
-from django.db.models.functions import TruncMonth
+from django.contrib.auth import get_user_model
 from django.db.models import Avg
-from sqlite3 import Timestamp
-from rest_framework.views import APIView
-from rest_framework import generics, viewsets
-from rest_framework import permissions, status
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from users.models import OrganizationObject, DataPoint, Project, Configuration, UserAccount, ProjectTeam
-from users.serializers import DataPointSerializer, ProjectTeamSerializer, UserCreateSerializer, ConfigurationSerializer, ProjectSerializer, UserSerializer
-from django.contrib.auth import get_user_model
-from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import get_object_or_404
+
+from users.models import (Configuration, DataPoint, OrganizationObject,
+                          Project, ProjectTeam, UserAccount)
+from users.serializers import (ConfigurationSerializer, DataPointSerializer,
+                               OrganizationObjectSerializer, ProjectSerializer,
+                               UserCreateSerializer, UserSerializer)
+from users.tasks import generate_data
+
 User = get_user_model()
 
 
-# GET agregated timeseries by data point hourly,
-# GET agregated timeseries by data point daily
-# GET agregated timeseries by data point monthly
-
-
-# GET all users
-# POST create user
 class UserAPIView(viewsets.ModelViewSet):
     queryset = UserAccount.objects.all()
     serializer_class = UserCreateSerializer
@@ -58,14 +44,27 @@ class UserAPIView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# GET projects
-# GET projects by Project id
 class ProjectAPIView(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    # permission_classes = [IsAdmin | IsSimpleUser]
 
-# GET projects by User
+    def get_serializer_class(self):
+        project_team = get_object_or_404(
+            ProjectTeam, user__email=self.request.user.email)
+        if project_team.role == ProjectTeam.ROLE_SIMPLE_USER:
+            return OrganizationObjectSerializer
+
+        return super(ProjectAPIView, self).get_serializer_class()
+
+    def get_queryset(self):
+        project_team = get_object_or_404(
+            ProjectTeam, user__email=self.request.user.email)
+        if project_team.role == ProjectTeam.ROLE_MODERATOR:
+            return Project.objects.filter(id=project_team.project.id)
+        elif project_team.role == ProjectTeam.ROLE_SIMPLE_USER:
+            return OrganizationObject.objects.filter(
+                id=project_team.project.id)
+        return super().get_queryset()
 
 
 @permission_classes([IsAuthenticated, ])
@@ -74,12 +73,9 @@ def get_project_by_user(request):
     user = get_object_or_404(UserAccount, pk=request.user.pk)
     project_team = ProjectTeam.objects.get(user=user)
     project_info = Project.objects.filter(pk=project_team.project.pk).values()
-
     return Response(project_info)
 
 
-# GET  all datapoint ids
-# POST user can create datapoint
 class DataPointAPIList(generics.ListCreateAPIView):
     queryset = DataPoint.objects.all()
     serializer_class = DataPointSerializer
@@ -89,7 +85,6 @@ class DataPointAPIList(generics.ListCreateAPIView):
         return Response({'ids': data})
 
 
-# GET  datapoint by id
 @api_view(['GET'])
 def get_datapoint_by_id(request, pk=None):
     obj = get_object_or_404(DataPoint, pk=pk)
@@ -97,26 +92,19 @@ def get_datapoint_by_id(request, pk=None):
     return Response(serializer.data)
 
 
-# POST store configuration in json format
-# PUT edit configuration json
-class ConfigurationView(generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):  # not working
+class ConfigurationView(generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Configuration.objects.all()
     serializer_class = ConfigurationSerializer
 
     def post(self, request):
-        # Retrieve data from the request body
         config_data = request.POST.get('config_data')
-
-        # Create or update the configuration
         configuration, created = Configuration.objects.update_or_create(
             user=request.user,
             defaults={'data': config_data}
         )
-
         return Response({'success': True, 'message': 'Configuration saved successfully.'})
 
 
-# agregated datapoints
 @api_view(['GET'])
 def get_average(request):
     result = DataPoint.objects.aggregate(Avg('value'))
@@ -145,13 +133,10 @@ def get_hourly(request, start_hour=None, hour_range=None):
 
     result = DataPoint.objects.filter(
         created_date__range=[start_h, end_h]).aggregate(Avg('value'))
-
     return Response(result)
 
 
-# Generated  timeseries data
 @api_view(['GET'])
 def generate_data_auth_user(request):
-    generate_data.delay(request.user.email)
-
+    generate_data.delay(request.user.is_authenticated)
     return Response({'action': 'generate data'})
