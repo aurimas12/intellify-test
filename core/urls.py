@@ -7,15 +7,7 @@ from rest_framework import permissions
 from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Intellify API",
-        default_version='v1',
 
-    ),
-    public=True,
-    permission_classes=[permissions.AllowAny],
-)
 urlpatterns = [
     path('admin/', admin.site.urls),
 
