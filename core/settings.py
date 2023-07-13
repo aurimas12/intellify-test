@@ -1,7 +1,10 @@
-from decouple import config
+import os
 from datetime import timedelta
-from django.core.management.utils import get_random_secret_key
 
+from decouple import config
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 SECRET_KEY = config('SECRET_KEY')
 
@@ -17,12 +20,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
     'rest_framework',
+    'drf_spectacular',
     'rest_framework_simplejwt',
-
-    'users',
     'celery',
-    'django_celery_beat'
+    'django_celery_beat',
+    'users',
+
 ]
 
 MIDDLEWARE = [
@@ -40,7 +45,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,7 +66,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -103,11 +109,11 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
-#     }
-# }
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
 
 AUTH_USER_MODEL = "users.UserAccount"
 
@@ -159,11 +165,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # SECURE_HSTS_SECONDS = 518400
 # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # SECURE_HSTS_PRELOAD = True
-# set the celery broker url
+
+
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
-# set the celery result backend
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
-# set the celery timezone
 CELERY_TIMEZONE = 'UTC'

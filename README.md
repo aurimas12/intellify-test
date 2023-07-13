@@ -60,11 +60,13 @@ Run django local server:
 python manage.py runserver
 ```
 
-- `http://127.0.0.1:8000/users` - User endpoint
-- `http://127.0.0.1:8000/admin` - Admin panel
 
-Test endpoint:
-- `http://127.0.0.1:8000/users` - first endpoint
+We will use the Swagger API to test our endpoints more easily!
+
+- `http://127.0.0.1:8000/api/` - Endpoints
+- `http://127.0.0.1:8000/admin/` - Admin panel
+
+
 
 
 ## MQTT

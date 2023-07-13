@@ -1,8 +1,11 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from .models import DataPoint, Configuration, OrganizationObject, Project, ProjectTeam, TimeSeries
+from rest_framework import serializers
+
+from users.models import (Configuration, DataPoint, Organization,
+                          OrganizationObject, Project, ProjectTeam, TimeSeries)
+
 User = get_user_model()
 
 
@@ -35,24 +38,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "email"]
-
-
-class OrganizationObjectSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = OrganizationObject
-        fields = '__all__'
-
-
-class DataPointSerializer(serializers.ModelSerializer):
-    object = OrganizationObjectSerializer()
-
-    class Meta:
-
-        model = DataPoint
-        fields = ["id", "name", "value", "project_name",
-                  "object_name", "created_date", "object"]
+        fields = ['id', 'first_name', 'last_name', 'email']
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
@@ -62,11 +48,22 @@ class ConfigurationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrganizationSerializer(serializers.ModelSerializer):
+    users = UserSerializer(many=True)
+
+    class Meta:
+        model = Organization
+        fields = ['name', 'description', 'users']
+
+
 class ProjectSerializer(serializers.ModelSerializer):
+    owner = UserSerializer()
+    organization = OrganizationSerializer()
 
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['id', 'title', 'description',
+                  'created_date', 'owner', 'organization']
 
 
 class ProjectTeamSerializer(serializers.ModelSerializer):
@@ -76,8 +73,25 @@ class ProjectTeamSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TimeSeriesSerializer(serializers.ModelSerializer):
+class OrganizationObjectSerializer(serializers.ModelSerializer):
+    project = ProjectSerializer()
 
+    class Meta:
+        model = OrganizationObject
+        fields = ['id', 'name', 'description', 'project']
+
+
+class DataPointSerializer(serializers.ModelSerializer):
+    object = OrganizationObjectSerializer()
+
+    class Meta:
+
+        model = DataPoint
+        fields = ['id', 'name', 'value', 'project_name',
+                  'object_name', 'created_date', 'object']
+
+
+class TimeSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeSeries
         fields = '__all__'
