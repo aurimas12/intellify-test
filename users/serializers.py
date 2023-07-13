@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
-from .models import DataPoint, Configuration, Project, TimeSeries
+from .models import DataPoint, Configuration, OrganizationObject, Project, ProjectTeam, TimeSeries
 User = get_user_model()
 
 
@@ -32,11 +32,27 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-class DataPointSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name", "email"]
+
+
+class OrganizationObjectSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = DataPoint
+        model = OrganizationObject
         fields = '__all__'
+
+
+class DataPointSerializer(serializers.ModelSerializer):
+    object = OrganizationObjectSerializer()
+
+    class Meta:
+
+        model = DataPoint
+        fields = ["id", "name", "value", "project_name",
+                  "object_name", "created_date", "object"]
 
 
 class ConfigurationSerializer(serializers.ModelSerializer):
@@ -50,6 +66,13 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
+        fields = '__all__'
+
+
+class ProjectTeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProjectTeam
         fields = '__all__'
 
 

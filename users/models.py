@@ -102,7 +102,7 @@ class DataPoint(models.Model):
 
 class Configuration(models.Model):
     user = models.OneToOneField(UserAccount, on_delete=models.CASCADE)
-    data = models.JSONField()
+    data = models.JSONField(null=True, blank=True)
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
